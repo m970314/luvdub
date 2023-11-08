@@ -4,7 +4,7 @@
     android:id="@+id/navigation">
 
     <fragment
-        android:id="@+id/loginFragment"
+        android:id="@+id/navigation_login"
         android:name="com.example.luvdub.Login.LoginFragment"
         android:label="Login Fragment">
     </fragment>
