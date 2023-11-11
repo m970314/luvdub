@@ -1,6 +1,7 @@
 package com.example.luvdub
 
 import android.os.Bundle
+import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.material3.Text
@@ -12,26 +13,37 @@ import com.example.luvdub.ui.theme.LuvdubTheme
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import com.example.luvdub.UsetInforSet.UserInforSetFragment
+import com.kakao.sdk.common.util.Utility
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            MoveLogin() // Loing 화면으로 이동
+            val keyHash = Utility.getKeyHash(this)
+            Log.d("keyHash", "$keyHash")
+            MoveFrgment() // Loing 화면으로 이동
         }
     }
 }
 
+// frgment별 composable 선언
 @Composable
-fun MoveLogin() {
+fun MoveFrgment() {
     val navController = rememberNavController()
-    // loginfragment로 이동(초기화면)
+
     NavHost(
         navController = navController,
         startDestination = "navigation_login"
     ) {
+        // loginfragment로 이동(초기화면)
         composable("navigation_login") {
             LoginFragment().LoginScreen()
+        }
+
+        // Uesr 데이터 입력화면으로 이동
+        composable("navigation_login") {
+            UserInforSetFragment().UserInforSetScrren()
         }
     }
 }

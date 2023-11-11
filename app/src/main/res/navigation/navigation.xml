@@ -9,4 +9,9 @@
         android:label="Login Fragment">
     </fragment>
 
+    <fragment
+        android:id="@+id/navigation_user_set"
+        android:name="com.example.luvdub.UsetInforSet.UserInforSetFragment"
+        android:label="UserSet Fragment">
+    </fragment>
 </navigation>
