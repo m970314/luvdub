@@ -1,0 +1,48 @@
+{
+  "project_info": {
+    "project_number": "757153338890",
+    "firebase_url": "https://loveduk-539e3-default-rtdb.firebaseio.com",
+    "project_id": "loveduk-539e3",
+    "storage_bucket": "loveduk-539e3.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:757153338890:android:61a40e80986375093731f3",
+        "android_client_info": {
+          "package_name": "com.example.luvdub"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "757153338890-3tescgb5qi2igh19f46scogds2vong84.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBbrcFfGi4nxVBX4loV2qmZq8kg3ZeE3W8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "757153338890-3tescgb5qi2igh19f46scogds2vong84.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "757153338890-155jf9j698nf11do46t43i63jig4ivt6.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.nasver.luvdub",
+                "app_store_id": "6451209130"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
