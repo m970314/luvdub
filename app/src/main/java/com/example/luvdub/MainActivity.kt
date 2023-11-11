@@ -42,7 +42,7 @@ fun MoveFrgment() {
         }
 
         // Uesr 데이터 입력화면으로 이동
-        composable("navigation_login") {
+        composable("navigation_user_set") {
             UserInforSetFragment().UserInforSetScrren()
         }
     }

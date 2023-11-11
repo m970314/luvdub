@@ -2,7 +2,11 @@ plugins {
     id 'com.android.application'
     id 'org.jetbrains.kotlin.android'
     id("com.google.gms.google-services") version "4.4.0" apply false
+    id 'com.google.android.libraries.mapsplatform.secrets-gradle-plugin'
 }
+
+Properties properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
 android {
     namespace 'com.example.luvdub'
@@ -19,6 +23,12 @@ android {
         vectorDrawables {
             useSupportLibrary true
         }
+
+        buildConfigField("String", "KAKAO_API_KEY", properties['KAKAO_APP_KEY'])
+    }
+
+    buildFeatures {
+        buildConfig = true
     }
 
     buildTypes {
@@ -60,9 +70,9 @@ dependencies {
     implementation 'androidx.compose.ui:ui-graphics'
     implementation 'androidx.compose.ui:ui-tooling-preview'
     implementation 'androidx.compose.material3:material3'
-    implementation(platform("com.google.firebase:firebase-bom:32.5.0"))
-    //implementation("com.google.firebase:firebase-analytics")
-    //implementation("com.google.firebase:firebase-auth-ktx")
+    implementation(platform("com.google.firebase:firebase-bom:31.2.0"))
+    implementation("com.google.firebase:firebase-analytics")
+    implementation("com.google.firebase:firebase-auth-ktx")
     implementation 'com.google.firebase:firebase-functions-ktx:20.3.1'
     implementation("com.google.firebase:firebase-firestore-ktx")
     implementation "com.kakao.sdk:v2-user:2.12.1"
