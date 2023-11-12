@@ -20,8 +20,6 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val keyHash = Utility.getKeyHash(this)
-            Log.d("keyHash", "$keyHash")
             MoveFrgment() // Loing 화면으로 이동
         }
     }
@@ -38,7 +36,7 @@ fun MoveFrgment() {
     ) {
         // loginfragment로 이동(초기화면)
         composable("navigation_login") {
-            LoginFragment().LoginScreen()
+            LoginFragment().LoginScreen(navController)
         }
 
         // Uesr 데이터 입력화면으로 이동
