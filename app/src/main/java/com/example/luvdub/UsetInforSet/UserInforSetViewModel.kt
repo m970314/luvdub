@@ -40,6 +40,24 @@ class UserInforSetViewModel(application: Application) : AndroidViewModel(applica
         }
     }
 
+    fun decreaseCurrentStep() {
+        // 다음 스텝으로 이동
+        val newStep = _currentStep.value - 1
+        _currentStep.value = newStep
+
+        // DataStore에 변경된 값을 저장
+        viewModelScope.launch {
+            val context = getApplication<Application>().applicationContext
+            LuvdubDataStoreManager.saveLuvdubIntPreferencesStore(
+                context,
+                IntPreferencesKey.LUV_CURRENT_TAB_INT,
+                newStep
+            )
+        }
+
+        updateTitleText()
+    }
+
     fun incrementCurrentStep() {
         // 다음 스텝으로 이동
         val newStep = _currentStep.value + 1
