@@ -25,11 +25,18 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.focusable
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
@@ -37,8 +44,11 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -130,6 +140,7 @@ class UserInforSetFragment {
         }
     }
 
+    // 타이틀바 아래에 Step에 따른 직선 설정
     @Composable
     fun DrawLine(currentStep : Int) {
         Canvas(
@@ -150,7 +161,6 @@ class UserInforSetFragment {
         )
     }
 
-    @OptIn(ExperimentalMaterial3Api::class)
     @Composable
     fun Step1Content(
     ) {
@@ -184,21 +194,69 @@ class UserInforSetFragment {
             )
         )
 
-        var text by remember { mutableStateOf("") }
-        // Edit : 닉네임 입력
-        BasicTextField(
-            value = text,
-            onValueChange = {
-                text = it
-            },
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(color = White)
-                .border(BorderStroke(1.dp, White))
-                .padding(top = 60.dp)
-        )
-    }
+        Spacer(modifier = Modifier.height(70.dp)) // 70dp의 마진
 
+        // Edit : 닉네임 입력
+        var isFocused by remember { mutableStateOf(false) }
+        var text by remember { mutableStateOf("") }
+        val maxLength = 6 // 닉네임 입력 최대 글자수
+        // BasicTextField에 Row를 입힌 이유는 EditText 가운데 정렬이 Row를 덮어 씌워야 먹힘
+        Row(
+            modifier = Modifier.fillMaxWidth().height(88.dp).padding(start = 30.dp, end = 30.dp)
+                .shadow(
+                    elevation = 4.dp,
+                    spotColor = Color(0x40000000),
+                    ambientColor = Color(0x40000000)
+                )
+                .border(
+                    width = 2.dp,
+                    color = if (isFocused) Color(0x30FFFFFF) else Color(0x87FA114F),
+                    shape = RoundedCornerShape(size = 10.dp)
+                )
+                .onFocusChanged{
+                    isFocused = !isFocused
+                },
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center
+        ) {
+            BasicTextField(
+                value = text,
+                singleLine = true,
+                onValueChange = {
+                    // 최대 6글자만 입력 가능하게 구현
+                    if (it.length < maxLength){  text = it }
+                    else{ text = it.take(maxLength)}
+                                },
+                textStyle = TextStyle.Default.copy(
+                    fontSize = 36.sp,
+                    lineHeight = 28.sp,
+                    fontWeight = FontWeight(400),
+                    color = Color(0xFFFA114F),
+                    textAlign = TextAlign.Center,
+                ),
+                decorationBox = { innerTextField ->
+                    // HintText 정의
+                    if (text.isEmpty()) {
+                        Text(
+                            "닉네임 입력",
+                            style = TextStyle(
+                                fontSize = 36.sp,
+                                lineHeight = 28.sp,
+                                fontWeight = FontWeight(100),
+                                color = Color(0xFFBDBCBC),
+                                textAlign = TextAlign.Center,
+                            ),
+                            modifier = Modifier.fillMaxWidth()
+                        )
+                    }
+                    // 사용자가 EditText를 입력할 때 BasicTextField -> 속성을 EditText에 입힘
+                    innerTextField()
+                },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+
+    }
     @Composable
     fun Step2Content() {
         // Step 2의 UI 구성
