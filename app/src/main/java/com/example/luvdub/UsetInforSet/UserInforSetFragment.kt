@@ -33,33 +33,47 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.TextField
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luvdub.R
+import com.example.luvdub.ui.theme.Black
 import com.example.luvdub.ui.theme.Pink14
 import com.example.luvdub.ui.theme.Pink80
 import com.example.luvdub.ui.theme.White
+import com.example.luvdub.ui.theme.Yellow
 
 class UserInforSetFragment {
 
@@ -67,7 +81,6 @@ class UserInforSetFragment {
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
     fun UserInforSetScrren(viewModel: UserInforSetViewModel = viewModel(UserInforSetViewModel::class.java)) {
-
         // datamanager에 저장된 currentStep값을 ViewModel에서 추출
         val currentStep by viewModel.currentStep.collectAsState()
         val titleText by viewModel.titleText.collectAsState()
@@ -133,8 +146,27 @@ class UserInforSetFragment {
                     } else {
                         viewModel.clearCurrentStep()
                     }
-                }) {
-                    Text("다음으로")
+                },
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = White,
+                        contentColor = White
+                    ),
+
+                    modifier = Modifier.fillMaxWidth().padding(start = 40.dp, end = 40.dp, bottom = 20.dp).height(58.dp)
+                ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.property_btn_on),
+                            contentDescription = null,
+                            modifier = Modifier.size(400.dp),
+                            contentScale = ContentScale.Crop
+                        )
+
+                        Text("다음으로")
+                    }
                 }
             }
         }
@@ -164,7 +196,7 @@ class UserInforSetFragment {
     @Composable
     fun Step1Content(
     ) {
-
+        val focusManager = LocalFocusManager.current
         // Step 1의 UI 구성
         Text(
             text = "사용할 닉네임을 입력하세요",
@@ -202,7 +234,10 @@ class UserInforSetFragment {
         val maxLength = 6 // 닉네임 입력 최대 글자수
         // BasicTextField에 Row를 입힌 이유는 EditText 가운데 정렬이 Row를 덮어 씌워야 먹힘
         Row(
-            modifier = Modifier.fillMaxWidth().height(88.dp).padding(start = 30.dp, end = 30.dp)
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(88.dp)
+                .padding(start = 30.dp, end = 30.dp)
                 .shadow(
                     elevation = 4.dp,
                     spotColor = Color(0x40000000),
@@ -212,10 +247,7 @@ class UserInforSetFragment {
                     width = 2.dp,
                     color = if (isFocused) Color(0x30FFFFFF) else Color(0x87FA114F),
                     shape = RoundedCornerShape(size = 10.dp)
-                )
-                .onFocusChanged{
-                    isFocused = !isFocused
-                },
+                ),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.Center
         ) {
@@ -252,7 +284,20 @@ class UserInforSetFragment {
                     // 사용자가 EditText를 입력할 때 BasicTextField -> 속성을 EditText에 입힘
                     innerTextField()
                 },
-                modifier = Modifier.fillMaxWidth()
+                keyboardOptions = KeyboardOptions(
+                    imeAction = ImeAction.Done
+                ),
+                keyboardActions = KeyboardActions(
+                    onDone = {
+                        // 키패드 완료 버튼을 눌렀을 때 focus해제
+                        focusManager.clearFocus()
+                    }
+                ),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .onFocusChanged {
+                        isFocused = !it.isFocused
+                    }
             )
         }
 
