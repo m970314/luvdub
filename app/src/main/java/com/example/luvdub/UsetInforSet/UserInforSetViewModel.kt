@@ -42,7 +42,10 @@ class UserInforSetViewModel(application: Application) : AndroidViewModel(applica
 
     fun decreaseCurrentStep() {
         // 다음 스텝으로 이동
-        val newStep = _currentStep.value - 1
+        var newStep = _currentStep.value - 1
+
+        // Step의 최소값은 1
+        if (newStep < 1) newStep = 1
         _currentStep.value = newStep
 
         // DataStore에 변경된 값을 저장

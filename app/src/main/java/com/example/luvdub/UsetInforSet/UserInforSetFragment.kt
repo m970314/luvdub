@@ -1,10 +1,7 @@
 package com.example.luvdub.UsetInforSet
 
 import android.annotation.SuppressLint
-import android.graphics.Paint.Align
 import android.util.Log
-import android.widget.EditText
-import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -16,7 +13,6 @@ import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -27,23 +23,16 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.focusable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.TextField
-import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -51,15 +40,10 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -69,13 +53,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luvdub.R
-import com.example.luvdub.ui.theme.Black
 import com.example.luvdub.ui.theme.Pink14
-import com.example.luvdub.ui.theme.Pink80
 import com.example.luvdub.ui.theme.White
-import com.example.luvdub.ui.theme.Yellow
 
 class UserInforSetFragment {
+    // 에디트에 문자를 입력받을 때 버튼의 enable처리를 위해 상위 클래스에 선언(에디트에 아무것도 입력 값이 없을 시 enable: false)
+    var text by mutableStateOf("")
 
     @Composable
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -86,6 +69,7 @@ class UserInforSetFragment {
         val titleText by viewModel.titleText.collectAsState()
         val MAX_STEP = 5
 
+        Log.d("currentStep",currentStep.toString())
         // Scaffold는 Compose에서 실험적으로 사용하고 있는 API지만 공부를 위해 한번 써봄
         Scaffold(
             // 커스텀 타이틀바 구성
@@ -152,7 +136,8 @@ class UserInforSetFragment {
                         contentColor = White
                     ),
 
-                    modifier = Modifier.fillMaxWidth().padding(start = 40.dp, end = 40.dp, bottom = 20.dp).height(58.dp)
+                    modifier = Modifier.fillMaxWidth().padding(start = 40.dp, end = 40.dp, bottom = 20.dp).height(58.dp),
+                    enabled = if (currentStep == 1) text.isNotEmpty() else true
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
@@ -193,6 +178,7 @@ class UserInforSetFragment {
         )
     }
 
+    @OptIn(ExperimentalComposeUiApi::class)
     @Composable
     fun Step1Content(
     ) {
@@ -202,7 +188,7 @@ class UserInforSetFragment {
             text = "사용할 닉네임을 입력하세요",
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 76.dp),
+                .padding(top = 60.dp),
             style = TextStyle(
                 fontSize = 24.sp,
                 lineHeight = 28.sp,
@@ -226,12 +212,13 @@ class UserInforSetFragment {
             )
         )
 
-        Spacer(modifier = Modifier.height(70.dp)) // 70dp의 마진
+        Spacer(modifier = Modifier.height(50.dp)) // 50dp의 마진
 
         // Edit : 닉네임 입력
         var isFocused by remember { mutableStateOf(false) }
-        var text by remember { mutableStateOf("") }
+        //var text by remember { mutableStateOf("") }
         val maxLength = 6 // 닉네임 입력 최대 글자수
+
         // BasicTextField에 Row를 입힌 이유는 EditText 가운데 정렬이 Row를 덮어 씌워야 먹힘
         Row(
             modifier = Modifier
