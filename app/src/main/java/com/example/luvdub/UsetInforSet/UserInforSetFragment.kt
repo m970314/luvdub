@@ -1,6 +1,8 @@
 package com.example.luvdub.UsetInforSet
 
 import android.annotation.SuppressLint
+import android.icu.text.DateFormatSymbols
+import android.icu.text.SimpleDateFormat
 import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
@@ -21,18 +23,30 @@ import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTransformGestures
+import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.LocalContentColor
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -43,18 +57,31 @@ import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luvdub.R
 import com.example.luvdub.ui.theme.Pink14
 import com.example.luvdub.ui.theme.White
+import java.time.LocalDate
+import java.util.Date
+import java.util.Locale
+import com.commandiron.wheel_picker_compose.core.WheelTextPicker
+import com.commandiron.wheel_picker_compose.WheelDateTimePicker
+import com.commandiron.wheel_picker_compose.WheelTimePicker
+import com.commandiron.wheel_picker_compose.core.TimeFormat
+import com.commandiron.wheel_picker_compose.core.WheelPickerDefaults
 
 class UserInforSetFragment {
     // 에디트에 문자를 입력받을 때 버튼의 enable처리를 위해 상위 클래스에 선언(에디트에 아무것도 입력 값이 없을 시 enable: false)
@@ -292,12 +319,81 @@ class UserInforSetFragment {
     @Composable
     fun Step2Content() {
         // Step 2의 UI 구성
-        Text("Step 2 Content")
+        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.KOREA)
+        val date = Date()
+
+        var yearState by remember { mutableStateOf(formatter.format(date).split("-").first()) }
+        var monthState by remember { mutableStateOf(formatter.format(date).split("-")[1]) }
+        var dayState by remember { mutableStateOf(formatter.format(date).split("-").last()) }
+
+        Text(
+            text = "우리의 기념일을 입력하세요",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 60.dp),
+            style = TextStyle(
+                fontSize = 24.sp,
+                lineHeight = 28.sp,
+                fontWeight = FontWeight(700),
+                color = Color(0xFF000000),
+                textAlign = TextAlign.Center,
+            )
+        )
+
+        Text(
+            text = yearState + "년" + monthState + "월" + dayState + "일",
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 30.dp),
+            style = TextStyle(
+                fontSize = 32.sp,
+                lineHeight = 28.sp,
+                fontWeight = FontWeight(700),
+                color = Color(0xFFFA114F),
+                textAlign = TextAlign.Center,
+                )
+        )
+
+        Spacer(modifier = Modifier.height(30.dp)) // 50dp의 마진
+
+        WheelDatePicker()
     }
 
     @Composable
     fun Step3Content() {
         // Step 3의 UI 구성
         Text("Step 3 Content")
+    }
+
+    @Composable
+    fun WheelDatePicker(
+        modifier: Modifier = Modifier,
+        startDate: LocalDate = LocalDate.now(),
+        minDate: LocalDate = LocalDate.MIN,
+        maxDate: LocalDate = LocalDate.MAX,
+        yearsRange: IntRange? = IntRange(1922, 2122),
+        size: DpSize = DpSize(256.dp, 128.dp),
+        rowCount: Int = 3,
+        textStyle: TextStyle = MaterialTheme.typography.titleMedium,
+        textColor: Color = LocalContentColor.current,
+        selectorProperties: SelectorProperties = WheelPickerDefaults.selectorProperties(),
+        onSnappedDate : (snappedDate: LocalDate) -> Unit = {}
+    ) {
+        DefaultWheelDatePicker(
+            modifier,
+            startDate,
+            minDate,
+            maxDate,
+            yearsRange,
+            size,
+            rowCount,
+            textStyle,
+            textColor,
+            selectorProperties,
+            onSnappedDate = { snappedDate ->
+                onSnappedDate(snappedDate.snappedLocalDate)
+                snappedDate.snappedIndex
+            }
+        )
     }
 }
