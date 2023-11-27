@@ -1,7 +1,6 @@
 package com.example.luvdub.UsetInforSet
 
 import android.annotation.SuppressLint
-import android.icu.text.DateFormatSymbols
 import android.icu.text.SimpleDateFormat
 import android.util.Log
 import androidx.compose.foundation.background
@@ -26,26 +25,20 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.detectTransformGestures
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.LocalContentColor
-import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -67,21 +60,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
-import androidx.compose.ui.unit.DpSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luvdub.R
 import com.example.luvdub.ui.theme.Pink14
 import com.example.luvdub.ui.theme.White
-import java.time.LocalDate
 import java.util.Date
 import java.util.Locale
-import com.commandiron.wheel_picker_compose.core.WheelTextPicker
-import com.commandiron.wheel_picker_compose.WheelDateTimePicker
-import com.commandiron.wheel_picker_compose.WheelTimePicker
-import com.commandiron.wheel_picker_compose.core.TimeFormat
-import com.commandiron.wheel_picker_compose.core.WheelPickerDefaults
 
 class UserInforSetFragment {
     // 에디트에 문자를 입력받을 때 버튼의 enable처리를 위해 상위 클래스에 선언(에디트에 아무것도 입력 값이 없을 시 enable: false)
@@ -163,7 +149,10 @@ class UserInforSetFragment {
                         contentColor = White
                     ),
 
-                    modifier = Modifier.fillMaxWidth().padding(start = 40.dp, end = 40.dp, bottom = 20.dp).height(58.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(start = 40.dp, end = 40.dp, bottom = 20.dp)
+                        .height(58.dp),
                     enabled = if (currentStep == 1) text.isNotEmpty() else true
                 ) {
                     Box(
@@ -319,12 +308,28 @@ class UserInforSetFragment {
     @Composable
     fun Step2Content() {
         // Step 2의 UI 구성
-        val formatter = SimpleDateFormat("yyyy-MM-dd", Locale.KOREA)
-        val date = Date()
+        var day by remember {
+            mutableStateOf(1)
+        }
+        var month by remember {
+            mutableStateOf(1)
+        }
+        var year by remember {
+            mutableStateOf(2023)
+        }
+        var lastDayInMonth by remember {
+            mutableStateOf(30)
+        }
 
-        var yearState by remember { mutableStateOf(formatter.format(date).split("-").first()) }
-        var monthState by remember { mutableStateOf(formatter.format(date).split("-")[1]) }
-        var dayState by remember { mutableStateOf(formatter.format(date).split("-").last()) }
+        fun adjustDay() {
+            val newLastDayInMonth = lastDayInMonth(month, year)
+            if (lastDayInMonth != newLastDayInMonth) {
+                lastDayInMonth = newLastDayInMonth
+                if (day > newLastDayInMonth) {
+                    day = lastDayInMonth
+                }
+            }
+        }
 
         Text(
             text = "우리의 기념일을 입력하세요",
@@ -341,7 +346,7 @@ class UserInforSetFragment {
         )
 
         Text(
-            text = yearState + "년" + monthState + "월" + dayState + "일",
+            text = year.toString()  + "년" + month.toString()  + "월" + day.toString()  + "일",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 30.dp),
@@ -355,8 +360,56 @@ class UserInforSetFragment {
         )
 
         Spacer(modifier = Modifier.height(30.dp)) // 50dp의 마진
+        
+        Row(modifier = Modifier
+            .fillMaxSize()
+            .padding(start = 20.dp, end = 20.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly) {
 
-        WheelDatePicker()
+            WheelDatePicker(
+                width = 120.dp,
+                itemHeight = 70.dp,
+                items = (1950 .. 2100).toList(),
+                initialItem = 2023,
+                textStyle = TextStyle(fontSize = 23.sp),
+                textColor = Color.LightGray,
+                selectedTextColor = Color.Black,
+                unit = "년",
+                onItemSelected = { i, item ->
+                    year = item - 1
+                    adjustDay()
+                }
+            )
+
+            WheelDatePicker(
+                width = 120.dp,
+                itemHeight = 70.dp,
+                items = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"),
+                initialItem = "12",
+                textStyle = TextStyle(fontSize = 23.sp),
+                textColor = Color.LightGray,
+                selectedTextColor = Color.Black,
+                unit = "월",
+                onItemSelected = { i, item ->
+                    month = i + 1
+                    adjustDay()
+                }
+            )
+
+            WheelDatePicker(
+                width = 120.dp,
+                itemHeight = 70.dp,
+                items = (1..lastDayInMonth).toMutableList(),
+                initialItem = day,
+                textStyle = TextStyle(fontSize = 23.sp),
+                textColor = Color.LightGray,
+                selectedTextColor = Color.Black,
+                unit = "일",
+                onItemSelected = { i, item ->
+                    day = item
+                }
+            )
+        }
     }
 
     @Composable
@@ -365,35 +418,95 @@ class UserInforSetFragment {
         Text("Step 3 Content")
     }
 
-    @Composable
-    fun WheelDatePicker(
-        modifier: Modifier = Modifier,
-        startDate: LocalDate = LocalDate.now(),
-        minDate: LocalDate = LocalDate.MIN,
-        maxDate: LocalDate = LocalDate.MAX,
-        yearsRange: IntRange? = IntRange(1922, 2122),
-        size: DpSize = DpSize(256.dp, 128.dp),
-        rowCount: Int = 3,
-        textStyle: TextStyle = MaterialTheme.typography.titleMedium,
-        textColor: Color = LocalContentColor.current,
-        selectorProperties: SelectorProperties = WheelPickerDefaults.selectorProperties(),
-        onSnappedDate : (snappedDate: LocalDate) -> Unit = {}
-    ) {
-        DefaultWheelDatePicker(
-            modifier,
-            startDate,
-            minDate,
-            maxDate,
-            yearsRange,
-            size,
-            rowCount,
-            textStyle,
-            textColor,
-            selectorProperties,
-            onSnappedDate = { snappedDate ->
-                onSnappedDate(snappedDate.snappedLocalDate)
-                snappedDate.snappedIndex
+    private fun lastDayInMonth(month: Int, year: Int): Int {
+        return if (month != 2) {
+            31 - (month - 1) % 7 % 2
+        } else {
+            if (year and 3 == 0 && (year % 25 != 0 || year and 15 == 0)) {
+                29
+            } else {
+                28
             }
-        )
+        }
+    }
+
+    @OptIn(ExperimentalFoundationApi::class)
+    @Composable
+    fun <T> WheelDatePicker(
+        width: Dp,
+        itemHeight: Dp,
+        numberOfDisplayedItems: Int = 3,
+        items: List<T>,
+        initialItem: T,
+        itemScaleFact: Float = 1.5f,
+        textStyle: TextStyle,
+        textColor: Color,
+        selectedTextColor: Color,
+        unit: String,
+        onItemSelected: (index: Int, item: T) -> Unit = { _, _ -> }
+    ) {
+        val itemHalfHeight = LocalDensity.current.run { itemHeight.toPx() / 2f }
+        val scrollState = rememberLazyListState(0)
+        var lastSelectedIndex by remember {
+            mutableStateOf(0)
+        }
+        var itemsState by remember {
+            mutableStateOf(items)
+        }
+        LaunchedEffect(items) {
+            var targetIndex = items.indexOf(initialItem) - 1
+            targetIndex += ((Int.MAX_VALUE / 2) / items.size) * items.size
+            itemsState = items
+            lastSelectedIndex = targetIndex
+            scrollState.scrollToItem(targetIndex)
+        }
+        LazyColumn(
+            modifier = Modifier
+                .width(width)
+                .height(itemHeight * numberOfDisplayedItems),
+            state = scrollState,
+            flingBehavior = rememberSnapFlingBehavior(
+                lazyListState = scrollState
+            )
+        ) {
+            items(
+                count = Int.MAX_VALUE,
+                itemContent = { i ->
+                    val item = itemsState[i % itemsState.size]
+                    Box(
+                        modifier = Modifier
+                            .height(itemHeight)
+                            .fillMaxWidth()
+                            .onGloballyPositioned { coordinates ->
+                                val y = coordinates.positionInParent().y - itemHalfHeight
+                                val parentHalfHeight = (itemHalfHeight * numberOfDisplayedItems)
+                                val isSelected =
+                                    (y > parentHalfHeight - itemHalfHeight && y < parentHalfHeight + itemHalfHeight)
+                                val index = i - 1
+                                if (isSelected && lastSelectedIndex != index) {
+                                    onItemSelected(index % itemsState.size, item)
+                                    lastSelectedIndex = index
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = item.toString() + unit,
+                            style = textStyle,
+                            color = if (lastSelectedIndex == i) {
+                                selectedTextColor
+                            } else {
+                                textColor
+                            },
+                            fontSize = if (lastSelectedIndex == i) {
+                                textStyle.fontSize * itemScaleFact
+                            } else {
+                                textStyle.fontSize
+                            }
+                        )
+                    }
+                }
+            )
+        }
     }
 }
