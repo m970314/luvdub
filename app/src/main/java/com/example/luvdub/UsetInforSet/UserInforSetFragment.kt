@@ -66,6 +66,8 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luvdub.R
 import com.example.luvdub.ui.theme.Pink14
 import com.example.luvdub.ui.theme.White
+import java.time.LocalDate
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 
@@ -82,7 +84,6 @@ class UserInforSetFragment {
         val titleText by viewModel.titleText.collectAsState()
         val MAX_STEP = 5
 
-        Log.d("currentStep",currentStep.toString())
         // Scaffold는 Compose에서 실험적으로 사용하고 있는 API지만 공부를 위해 한번 써봄
         Scaffold(
             // 커스텀 타이틀바 구성
@@ -308,14 +309,16 @@ class UserInforSetFragment {
     @Composable
     fun Step2Content() {
         // Step 2의 UI 구성
+        val currentDate = Calendar.getInstance()
+
         var day by remember {
-            mutableStateOf(1)
+            mutableStateOf(currentDate.get(Calendar.DAY_OF_MONTH))
         }
         var month by remember {
-            mutableStateOf(1)
+            mutableStateOf(currentDate.get(Calendar.MONTH) + 1 )
         }
         var year by remember {
-            mutableStateOf(2023)
+            mutableStateOf(currentDate.get(Calendar.YEAR))
         }
         var lastDayInMonth by remember {
             mutableStateOf(30)
@@ -346,7 +349,7 @@ class UserInforSetFragment {
         )
 
         Text(
-            text = year.toString()  + "년" + month.toString()  + "월" + day.toString()  + "일",
+            text = year.toString()  + "년" + month.toString()  + "월" + (day).toString()  + "일",
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(top = 30.dp),
@@ -363,14 +366,14 @@ class UserInforSetFragment {
         
         Row(modifier = Modifier
             .fillMaxSize()
+            .height(235.dp)
             .padding(start = 20.dp, end = 20.dp),
             horizontalArrangement = Arrangement.SpaceEvenly) {
-
             WheelDatePicker(
                 width = 120.dp,
-                itemHeight = 70.dp,
+                itemHeight = 43.dp,
                 items = (1950 .. 2100).toList(),
-                initialItem = 2023,
+                initialItem = currentDate.get(Calendar.YEAR) - 1,
                 textStyle = TextStyle(fontSize = 24.sp),
                 textColor = Color.LightGray,
                 selectedTextColor = Color.Black,
@@ -383,22 +386,22 @@ class UserInforSetFragment {
 
             WheelDatePicker(
                 width = 120.dp,
-                itemHeight = 70.dp,
+                itemHeight = 43.dp,
                 items = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"),
-                initialItem = "12",
+                initialItem = currentDate.get(Calendar.MONTH),
                 textStyle = TextStyle(fontSize = 24.sp),
                 textColor = Color.LightGray,
                 selectedTextColor = Color.Black,
                 unit = "월",
                 onItemSelected = { i, item ->
-                    month = i + 1
+                    month = i
                     adjustDay()
                 }
             )
 
             WheelDatePicker(
                 width = 120.dp,
-                itemHeight = 70.dp,
+                itemHeight = 43.dp,
                 items = (1..lastDayInMonth).toMutableList(),
                 initialItem = day,
                 textStyle = TextStyle(fontSize = 24.sp),
@@ -406,7 +409,7 @@ class UserInforSetFragment {
                 selectedTextColor = Color.Black,
                 unit = "일",
                 onItemSelected = { i, item ->
-                    day = item
+                    day = i
                 }
             )
         }
@@ -435,7 +438,7 @@ class UserInforSetFragment {
     fun <T> WheelDatePicker(
         width: Dp,
         itemHeight: Dp,
-        numberOfDisplayedItems: Int = 3,
+        numberOfDisplayedItems: Int = 5,
         items: List<T>,
         initialItem: T,
         itemScaleFact: Float = 1.5f,
@@ -484,8 +487,9 @@ class UserInforSetFragment {
                                     (y > parentHalfHeight - itemHalfHeight && y < parentHalfHeight + itemHalfHeight)
                                 val index = i - 1
                                 if (isSelected && lastSelectedIndex != index) {
-                                    onItemSelected(index % itemsState.size, item)
+                                    onItemSelected((i % (itemsState.size)), item)
                                     lastSelectedIndex = index
+                                    //Log.d("index", "(index % itemsState.size).toString()" + "${i % itemsState.size}" + "//" + "$i" + "//" + "${itemsState.size}")
                                 }
                             },
                         contentAlignment = Alignment.Center
