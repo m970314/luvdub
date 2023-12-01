@@ -24,6 +24,9 @@ object LuvdubDataStoreManager {
     private val LUV_DEFAULT_STRING: Preferences.Key<String> = stringPreferencesKey("default_string") // STRING 빈값 방지를 위한 DEFAULT
     private val LUV_CURRENT_STEP: Preferences.Key<Int> = intPreferencesKey("luvdub_current_step") // 현재 스텝 값
     private val LUV_USER_NICKNAME: Preferences.Key<String> = stringPreferencesKey("luvdub_user_nickname") // 사용자가 입력한 nickname 값
+    private val LUV_USER_CALENDAR_YEAR: Preferences.Key<Int> = intPreferencesKey("luvdub_user_calendar_year") // 사용자가 입력한 nickname 값
+    private val LUV_USER_CALENDAR_MONTH: Preferences.Key<Int> = intPreferencesKey("luvdub_user_calendar_month") // 사용자가 입력한 nickname 값
+    private val LUV_USER_CALENDAR_DAY: Preferences.Key<Int> = intPreferencesKey("luvdub_user_calendar_day") // 사용자가 입력한 nickname 값
     /**
      * Int타입의 Preferences DataStore을 쓰기 위한 함수
      *
@@ -72,7 +75,11 @@ object LuvdubDataStoreManager {
      */
     private fun getIntPreferencesKey(luvdubPreferencesKey: LuvdubPreferencesKey): Preferences.Key<Int> {
         return when (luvdubPreferencesKey) {
-            LuvdubPreferencesKey.LUV_CURRENT_STEP_INT -> LUV_CURRENT_STEP
+            LuvdubPreferencesKey.LUV_CURRENT_STEP_INT -> LUV_CURRENT_STEP // 현재 스텝 키값
+            // 사용자가 설정한 기념일의 년, 월, 일 키값
+            LuvdubPreferencesKey.LUV_USER_CALENDAR_YEAR_INT -> LUV_USER_CALENDAR_YEAR
+            LuvdubPreferencesKey.LUV_USER_CALENDAR_MONTH_INT -> LUV_USER_CALENDAR_MONTH
+            LuvdubPreferencesKey.LUV_USER_CALENDAR_DAY_INT -> LUV_USER_CALENDAR_DAY
             else -> LUV_DEFAULT_INT
         }
     }
@@ -125,7 +132,7 @@ object LuvdubDataStoreManager {
      */
     private fun getStringPreferencesKey(luvdubPreferencesKey: LuvdubPreferencesKey): Preferences.Key<String> {
         return when (luvdubPreferencesKey) {
-            LuvdubPreferencesKey.LUV_USER_NICKNAME_STRING -> LUV_USER_NICKNAME
+            LuvdubPreferencesKey.LUV_USER_NICKNAME_STRING -> LUV_USER_NICKNAME // 사용자가 설정한 닉네임 키값
             else -> LUV_DEFAULT_STRING
         }
     }
