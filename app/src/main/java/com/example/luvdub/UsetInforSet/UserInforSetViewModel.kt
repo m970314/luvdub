@@ -1,11 +1,9 @@
 package com.example.luvdub.UsetInforSet
 
 import android.app.Application
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
-import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import com.example.luvdub.data_store.IntPreferencesKey
+import com.example.luvdub.data_store.LuvdubPreferencesKey
 import com.example.luvdub.data_store.LuvdubDataStoreManager
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -18,6 +16,10 @@ class UserInforSetViewModel(application: Application) : AndroidViewModel(applica
     private val _currentStep = MutableStateFlow(0)
     val currentStep: StateFlow<Int> get() = _currentStep.asStateFlow()
 
+    // User가 설정한 Nickname 값
+    private val _userNickname = MutableStateFlow("")
+    val userNickname: StateFlow<String> get() = _userNickname.asStateFlow()
+
     // 현재 Step에 대한 Title Text 값
     private val _titleText = MutableStateFlow("")
     val titleText: StateFlow<String> get() = _titleText.asStateFlow()
@@ -28,20 +30,26 @@ class UserInforSetViewModel(application: Application) : AndroidViewModel(applica
              **** ViewModel에 저장하는 이유는 ViewModel에 비동기로 저장시켜놓고 View에서 필요할때마다 불러올 수 있기때문
             */
             val context = getApplication<Application>().applicationContext
-            val initialValue = LuvdubDataStoreManager.getLuvdubIntPreferencesStore(
+            val initStepValue = LuvdubDataStoreManager.getLuvdubIntPreferencesStore(
                 context,
-                IntPreferencesKey.LUV_CURRENT_TAB_INT
+                LuvdubPreferencesKey.LUV_CURRENT_STEP_INT
+            ).first()
+
+            val initNicknameValue = LuvdubDataStoreManager.getLuvdubStringPreferencesStore(
+                context,
+                LuvdubPreferencesKey.LUV_USER_NICKNAME_STRING
             ).first()
 
             // ViewModel의 StateFlow에 값을 설정
-            _currentStep.value = initialValue
-
+            _currentStep.value = initStepValue
+            _userNickname.value = initNicknameValue
             updateTitleText()
         }
     }
 
+    // 사용자가 Back버튼을 클릭했을때 호출하는 함수
     fun decreaseCurrentStep() {
-        // 다음 스텝으로 이동
+        // 이전 스텝으로 이동
         var newStep = _currentStep.value - 1
 
         // Step의 최소값은 1
@@ -53,7 +61,7 @@ class UserInforSetViewModel(application: Application) : AndroidViewModel(applica
             val context = getApplication<Application>().applicationContext
             LuvdubDataStoreManager.saveLuvdubIntPreferencesStore(
                 context,
-                IntPreferencesKey.LUV_CURRENT_TAB_INT,
+                LuvdubPreferencesKey.LUV_CURRENT_STEP_INT,
                 newStep
             )
         }
@@ -61,6 +69,7 @@ class UserInforSetViewModel(application: Application) : AndroidViewModel(applica
         updateTitleText()
     }
 
+    // 사용자가 다음으로 버튼 클릭시 호출하는 함수
     fun incrementCurrentStep() {
         // 다음 스텝으로 이동
         val newStep = _currentStep.value + 1
@@ -71,7 +80,7 @@ class UserInforSetViewModel(application: Application) : AndroidViewModel(applica
             val context = getApplication<Application>().applicationContext
             LuvdubDataStoreManager.saveLuvdubIntPreferencesStore(
                 context,
-                IntPreferencesKey.LUV_CURRENT_TAB_INT,
+                LuvdubPreferencesKey.LUV_CURRENT_STEP_INT,
                 newStep
             )
         }
@@ -85,8 +94,28 @@ class UserInforSetViewModel(application: Application) : AndroidViewModel(applica
             val context = getApplication<Application>().applicationContext
             LuvdubDataStoreManager.saveLuvdubIntPreferencesStore(
                 context,
-                IntPreferencesKey.LUV_CURRENT_TAB_INT,
+                LuvdubPreferencesKey.LUV_CURRENT_STEP_INT,
                 1
+            )
+        }
+
+        updateTitleText()
+    }
+
+    // 사용자가 editText를 통해 닉네임을 변경할때 호출되는 함수
+    fun changeNickname(changeNickname : String) {
+        _userNickname.value = changeNickname
+    }
+
+    // 사용자가 Step1에서 다음으로 버튼 클릭 시 닉네임을 dataStore에 저장
+    fun saveNickName() {
+        // DataStore에 변경된 값을 저장
+        viewModelScope.launch {
+            val context = getApplication<Application>().applicationContext
+            LuvdubDataStoreManager.saveLuvdubStringPreferencesStore(
+                context,
+                LuvdubPreferencesKey.LUV_USER_NICKNAME_STRING,
+                _userNickname.value
             )
         }
 

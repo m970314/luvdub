@@ -72,8 +72,6 @@ import java.util.Date
 import java.util.Locale
 
 class UserInforSetFragment {
-    // 에디트에 문자를 입력받을 때 버튼의 enable처리를 위해 상위 클래스에 선언(에디트에 아무것도 입력 값이 없을 시 enable: false)
-    var text by mutableStateOf("")
 
     @Composable
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
@@ -81,6 +79,9 @@ class UserInforSetFragment {
     fun UserInforSetScrren(viewModel: UserInforSetViewModel = viewModel(UserInforSetViewModel::class.java)) {
         // datamanager에 저장된 currentStep값을 ViewModel에서 추출
         val currentStep by viewModel.currentStep.collectAsState()
+        // datamanager에 저장된 userNickname값을 ViewModel에서 추출
+        val userNickname by viewModel.userNickname.collectAsState()
+        // Step에 맞는 Title 설정
         val titleText by viewModel.titleText.collectAsState()
         val MAX_STEP = 5
 
@@ -129,7 +130,7 @@ class UserInforSetFragment {
 
                 when (currentStep) {
                     // 스텝별 화면 설정
-                    1 -> Step1Content()
+                    1 -> Step1Content(userNickname,viewModel)
                     2 -> Step2Content()
                     3 -> Step3Content()
                 }
@@ -137,11 +138,18 @@ class UserInforSetFragment {
                 Spacer(modifier = Modifier.weight(1f))
 
                 Button(onClick = {
+
+                    // 다음 Step으로 이동하기 전에 현재 입력한 값을 datastore에 저장
+                    when(currentStep){
+                        1 -> viewModel.saveNickName()
+                    }
+
                     // 다음 스텝으로 이동
                     if (currentStep < MAX_STEP){
                         // 다음으로 클릭시 CurrentStep값을 +1 해줌
                         viewModel.incrementCurrentStep()
                     } else {
+                        // 혹시나 Step이 설정 이외의 값으로 튀었을때 Step초기화
                         viewModel.clearCurrentStep()
                     }
                 },
@@ -154,7 +162,7 @@ class UserInforSetFragment {
                         .fillMaxWidth()
                         .padding(start = 40.dp, end = 40.dp, bottom = 20.dp)
                         .height(58.dp),
-                    enabled = if (currentStep == 1) text.isNotEmpty() else true
+                    enabled = if (currentStep == 1) userNickname.isNotEmpty() else true
                 ) {
                     Box(
                         contentAlignment = Alignment.Center,
@@ -197,8 +205,7 @@ class UserInforSetFragment {
 
     @OptIn(ExperimentalComposeUiApi::class)
     @Composable
-    fun Step1Content(
-    ) {
+    fun Step1Content(userNickname : String, viewModel: UserInforSetViewModel) {
         val focusManager = LocalFocusManager.current
         // Step 1의 UI 구성
         Text(
@@ -256,12 +263,12 @@ class UserInforSetFragment {
             horizontalArrangement = Arrangement.Center
         ) {
             BasicTextField(
-                value = text,
+                value = userNickname,
                 singleLine = true,
                 onValueChange = {
                     // 최대 6글자만 입력 가능하게 구현
-                    if (it.length < maxLength){  text = it }
-                    else{ text = it.take(maxLength)}
+                    if (it.length > maxLength){  it.take(maxLength) }
+                    else {viewModel.changeNickname(it)}
                                 },
                 textStyle = TextStyle.Default.copy(
                     fontSize = 36.sp,
@@ -272,7 +279,7 @@ class UserInforSetFragment {
                 ),
                 decorationBox = { innerTextField ->
                     // HintText 정의
-                    if (text.isEmpty()) {
+                    if (userNickname.isEmpty() || userNickname.equals("")) {
                         Text(
                             "닉네임 입력",
                             style = TextStyle(
@@ -362,10 +369,10 @@ class UserInforSetFragment {
                 )
         )
 
-        Spacer(modifier = Modifier.height(30.dp)) // 50dp의 마진
+        Spacer(modifier = Modifier.height(40.dp)) // 50dp의 마진
         
         Row(modifier = Modifier
-            .fillMaxSize()
+            .fillMaxWidth()
             .height(235.dp)
             .padding(start = 20.dp, end = 20.dp),
             horizontalArrangement = Arrangement.SpaceEvenly) {
@@ -379,7 +386,7 @@ class UserInforSetFragment {
                 selectedTextColor = Color.Black,
                 unit = "년",
                 onItemSelected = { i, item ->
-                    year = item - 1
+                    year = item
                     adjustDay()
                 }
             )
@@ -387,14 +394,14 @@ class UserInforSetFragment {
             WheelDatePicker(
                 width = 120.dp,
                 itemHeight = 43.dp,
-                items = listOf("1", "2", "3", "4", "5", "6", "7", "8", "9", "10", "11", "12"),
-                initialItem = currentDate.get(Calendar.MONTH),
+                items = (1..12).toMutableList(),
+                initialItem = currentDate.get(Calendar.MONTH) + 1,
                 textStyle = TextStyle(fontSize = 24.sp),
                 textColor = Color.LightGray,
                 selectedTextColor = Color.Black,
                 unit = "월",
                 onItemSelected = { i, item ->
-                    month = i
+                    month = item // i는 index값인데 index는 0부터 시작하므로 +1함
                     adjustDay()
                 }
             )
@@ -403,13 +410,13 @@ class UserInforSetFragment {
                 width = 120.dp,
                 itemHeight = 43.dp,
                 items = (1..lastDayInMonth).toMutableList(),
-                initialItem = day,
+                initialItem = currentDate.get(Calendar.DAY_OF_MONTH) + 1,
                 textStyle = TextStyle(fontSize = 24.sp),
                 textColor = Color.LightGray,
                 selectedTextColor = Color.Black,
                 unit = "일",
                 onItemSelected = { i, item ->
-                    day = i
+                    day = item
                 }
             )
         }
@@ -487,9 +494,8 @@ class UserInforSetFragment {
                                     (y > parentHalfHeight - itemHalfHeight && y < parentHalfHeight + itemHalfHeight)
                                 val index = i - 1
                                 if (isSelected && lastSelectedIndex != index) {
-                                    onItemSelected((i % (itemsState.size)), item)
+                                    onItemSelected((index % (itemsState.size)), itemsState[index % itemsState.size])
                                     lastSelectedIndex = index
-                                    //Log.d("index", "(index % itemsState.size).toString()" + "${i % itemsState.size}" + "//" + "$i" + "//" + "${itemsState.size}")
                                 }
                             },
                         contentAlignment = Alignment.Center
