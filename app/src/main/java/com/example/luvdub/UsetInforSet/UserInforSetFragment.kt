@@ -81,6 +81,12 @@ class UserInforSetFragment {
         val currentStep by viewModel.currentStep.collectAsState()
         // datamanager에 저장된 userNickname값을 ViewModel에서 추출
         val userNickname by viewModel.userNickname.collectAsState()
+        // datamanager에 저장된 기념일의 년도 값을 ViewModel에서 추출
+        val userCalendar_year by viewModel.userCalendar_year.collectAsState()
+        // datamanager에 저장된 기념일의 달 값을 ViewModel에서 추출
+        val userCalendar_month by viewModel.userCalendar_month.collectAsState()
+        // datamanager에 저장된 기념일의 일자 값을 ViewModel에서 추출
+        val userCalendar_day by viewModel.userCalendar_day.collectAsState()
         // Step에 맞는 Title 설정
         val titleText by viewModel.titleText.collectAsState()
         val MAX_STEP = 5
@@ -131,7 +137,7 @@ class UserInforSetFragment {
                 when (currentStep) {
                     // 스텝별 화면 설정
                     1 -> Step1Content(userNickname,viewModel)
-                    2 -> Step2Content()
+                    2 -> Step2Content(userCalendar_year,userCalendar_month,userCalendar_day,viewModel)
                     3 -> Step3Content()
                 }
 
@@ -142,6 +148,7 @@ class UserInforSetFragment {
                     // 다음 Step으로 이동하기 전에 현재 입력한 값을 datastore에 저장
                     when(currentStep){
                         1 -> viewModel.saveNickName()
+                        2 -> viewModel.saveCalendar()
                     }
 
                     // 다음 스텝으로 이동
@@ -314,19 +321,11 @@ class UserInforSetFragment {
 
     }
     @Composable
-    fun Step2Content() {
+    fun Step2Content(year: Int, month: Int, day: Int, viewModel: UserInforSetViewModel) {
+
         // Step 2의 UI 구성
         val currentDate = Calendar.getInstance()
 
-        var day by remember {
-            mutableStateOf(currentDate.get(Calendar.DAY_OF_MONTH))
-        }
-        var month by remember {
-            mutableStateOf(currentDate.get(Calendar.MONTH) + 1 )
-        }
-        var year by remember {
-            mutableStateOf(currentDate.get(Calendar.YEAR))
-        }
         var lastDayInMonth by remember {
             mutableStateOf(30)
         }
@@ -336,7 +335,7 @@ class UserInforSetFragment {
             if (lastDayInMonth != newLastDayInMonth) {
                 lastDayInMonth = newLastDayInMonth
                 if (day > newLastDayInMonth) {
-                    day = lastDayInMonth
+                    viewModel.changeCalendar(lastDayInMonth,"day")
                 }
             }
         }
@@ -380,13 +379,13 @@ class UserInforSetFragment {
                 width = 120.dp,
                 itemHeight = 43.dp,
                 items = (1950 .. 2100).toList(),
-                initialItem = currentDate.get(Calendar.YEAR) - 1,
+                initialItem = year - 1,
                 textStyle = TextStyle(fontSize = 24.sp),
                 textColor = Color.LightGray,
                 selectedTextColor = Color.Black,
                 unit = "년",
                 onItemSelected = { i, item ->
-                    year = item
+                    viewModel.changeCalendar(item,"year")
                     adjustDay()
                 }
             )
@@ -395,13 +394,13 @@ class UserInforSetFragment {
                 width = 120.dp,
                 itemHeight = 43.dp,
                 items = (1..12).toMutableList(),
-                initialItem = currentDate.get(Calendar.MONTH) + 1,
+                initialItem = month - 1,
                 textStyle = TextStyle(fontSize = 24.sp),
                 textColor = Color.LightGray,
                 selectedTextColor = Color.Black,
                 unit = "월",
                 onItemSelected = { i, item ->
-                    month = item // i는 index값인데 index는 0부터 시작하므로 +1함
+                    viewModel.changeCalendar(item,"month")
                     adjustDay()
                 }
             )
@@ -410,13 +409,13 @@ class UserInforSetFragment {
                 width = 120.dp,
                 itemHeight = 43.dp,
                 items = (1..lastDayInMonth).toMutableList(),
-                initialItem = currentDate.get(Calendar.DAY_OF_MONTH) + 1,
+                initialItem = day - 1,
                 textStyle = TextStyle(fontSize = 24.sp),
                 textColor = Color.LightGray,
                 selectedTextColor = Color.Black,
                 unit = "일",
                 onItemSelected = { i, item ->
-                    day = item
+                    viewModel.changeCalendar(item,"day")
                 }
             )
         }
