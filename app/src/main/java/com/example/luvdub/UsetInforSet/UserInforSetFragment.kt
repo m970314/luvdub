@@ -424,7 +424,11 @@ class UserInforSetFragment {
     @Composable
     fun Step3Content() {
         // Step 3의 UI 구성
-        Text("Step 3 Content")
+        Box() {
+            Column() {
+                
+            }
+        }
     }
 
     private fun lastDayInMonth(month: Int, year: Int): Int {
@@ -493,7 +497,10 @@ class UserInforSetFragment {
                                     (y > parentHalfHeight - itemHalfHeight && y < parentHalfHeight + itemHalfHeight)
                                 val index = i - 1
                                 if (isSelected && lastSelectedIndex != index) {
-                                    onItemSelected((index % (itemsState.size)), itemsState[index % itemsState.size])
+                                    onItemSelected(
+                                        (index % (itemsState.size)),
+                                        itemsState[index % itemsState.size]
+                                    )
                                     lastSelectedIndex = index
                                 }
                             },
