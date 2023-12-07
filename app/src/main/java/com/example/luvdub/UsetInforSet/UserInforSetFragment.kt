@@ -1,8 +1,6 @@
 package com.example.luvdub.UsetInforSet
 
 import android.annotation.SuppressLint
-import android.icu.text.SimpleDateFormat
-import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -29,6 +27,7 @@ import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.width
@@ -39,12 +38,14 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.Divider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.ExperimentalComposeUiApi
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
@@ -66,10 +67,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luvdub.R
 import com.example.luvdub.ui.theme.Pink14
 import com.example.luvdub.ui.theme.White
-import java.time.LocalDate
 import java.util.Calendar
-import java.util.Date
-import java.util.Locale
 
 class UserInforSetFragment {
 
@@ -132,7 +130,7 @@ class UserInforSetFragment {
                     .padding(innerPadding)
             ) {
 
-                DrawLine(currentStep) // 타이틀바 밑에 라인 그리기
+                DrawLine(currentStep,0f,3) // 타이틀바 밑에 라인 그리기
 
                 when (currentStep) {
                     // 스텝별 화면 설정
@@ -191,19 +189,19 @@ class UserInforSetFragment {
 
     // 타이틀바 아래에 Step에 따른 직선 설정
     @Composable
-    fun DrawLine(currentStep : Int) {
+    fun DrawLine(lineRate : Int, lineHeight : Float, lineWeight : Int) {
         Canvas(
             modifier = Modifier
                 .fillMaxWidth()
                 .background(Pink14),
             onDraw = {
                 var maxStep = 4
-                var lineWidth = (size.width/maxStep * currentStep) // 스텝에 따라 동적으로 선의 길이 계산
+                var lineWidth = (size.width/maxStep * lineRate) // 스텝에 따라 동적으로 선의 길이 계산
                 drawLine(
                     color = Pink14,
                     start = Offset(0f, 0f),
-                    end = Offset(lineWidth, 0f),
-                    strokeWidth = 3.dp.toPx(),
+                    end = Offset(lineWidth, lineHeight),
+                    strokeWidth = lineWeight.dp.toPx(),
                     cap = StrokeCap.Round
                 )
             }
@@ -424,10 +422,160 @@ class UserInforSetFragment {
     @Composable
     fun Step3Content() {
         // Step 3의 UI 구성
-        Box() {
-            Column() {
-                
+        Box(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Text(
+                    text = "럽둡 사용에 꼭 필요해요!",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 60.dp),
+                    style = TextStyle(
+                        fontSize = 24.sp,
+                        lineHeight = 28.sp,
+                        fontWeight = FontWeight(700),
+                        color = Color(0xFF000000),
+                        textAlign = TextAlign.Center,
+                    )
+                )
+
+                Text(
+                    text = "우리만의 특별한 시그널을 느껴보세요.",
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp),
+                    style = TextStyle(
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight(400),
+                        color = Color(0xFF000000),
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 0.02.sp,
+                    )
+                )
+
+                Spacer(modifier = Modifier.padding(top = 20.dp))
+
+                Image(
+                    painter = painterResource(id = R.drawable.alarm_100),
+                    contentDescription = null,
+                    modifier = Modifier.size(100.dp),
+                    contentScale = ContentScale.Crop
+                )
+
+                Spacer(modifier = Modifier.padding(top = 20.dp))
+
+                Column(
+                    Modifier
+                        .border(
+                            width = 1.dp,
+                            color = Color(0x52FF4B7B),
+                            shape = RoundedCornerShape(size = 14.dp)
+                        )
+                        .width(273.dp)
+                        .height(154.dp)
+                        .background(
+                            color = Color(0xCCF2F2F2),
+                            shape = RoundedCornerShape(size = 14.dp)
+                        ),
+                    horizontalAlignment = Alignment.CenterHorizontally){
+
+                    Text(
+                        text = "알람 권한을 허용해 주세요",
+                        modifier = Modifier.padding(top = 15.dp),
+                        style = TextStyle(
+                            fontSize = 17.sp,
+                            lineHeight = 22.sp,
+                            fontWeight = FontWeight(600),
+                            color = Color(0xFF000000),
+                            textAlign = TextAlign.Center,
+                        )
+                    )
+
+                    Text(
+                        text = "알람기능이 꺼져있으면\n사랑하는 사람이 보내는 시그널을\n알아차리기 어려워요.",
+                        modifier = Modifier.padding(top = 2.dp),
+                        style = TextStyle(
+                            fontSize = 13.sp,
+                            lineHeight = 18.sp,
+                            fontWeight = FontWeight(400),
+                            color = Color(0xFF000000),
+                            textAlign = TextAlign.Center,
+                        )
+                    )
+
+                    Spacer(modifier = Modifier.padding(top = 15.dp))
+
+                    Divider(
+                        color = Color(0x52FF4B7B),
+                        modifier = Modifier.fillMaxWidth().height(1.dp)
+                    )
+
+                    Row(
+                        Modifier.fillMaxSize(),
+                        horizontalArrangement = Arrangement.Center,
+                        verticalAlignment = Alignment.CenterVertically,
+                    ) {
+                        Text(
+                            text = "허용 안 함",
+                            modifier = Modifier.weight(1f),
+                            style = TextStyle(
+                                fontSize = 17.sp,
+                                lineHeight = 22.sp,
+                                fontWeight = FontWeight(400),
+                                color = Color(0xFFB6B6B6),
+                                textAlign = TextAlign.Center,
+                            )
+                        )
+
+                        Divider(
+                            color = Color(0x52FF4B7B),
+                            modifier = Modifier.fillMaxHeight().width(1.dp)
+                        )
+
+                        // 겹치게 하는 부분
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .background(Color.Transparent) // Transparent background
+                        ) {
+                            Image(
+                                painter = painterResource(id = R.drawable.alarm_round),
+                                contentDescription = "image description",
+                                Modifier
+                                    .blur(radius = 4.dp)
+                                    .fillMaxSize(),
+                                contentScale = ContentScale.Crop
+                            )
+
+                            Text(
+                                text = "허용",
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .padding(16.dp), // Add padding for better visibility
+                                style = TextStyle(
+                                    fontSize = 17.sp,
+                                    lineHeight = 22.sp,
+                                    fontWeight = FontWeight(600),
+                                    color = Color(0xFFFA114F),
+                                    textAlign = TextAlign.Center,
+                                )
+                            )
+                        }
+                    }
+                }
             }
+
+            Image(
+                painter = painterResource(id = R.drawable.alarm_round),
+                contentDescription = "image description",
+                Modifier
+                    .blur(radius = 4.dp),
+                contentScale = ContentScale.Crop
+            )
         }
     }
 
