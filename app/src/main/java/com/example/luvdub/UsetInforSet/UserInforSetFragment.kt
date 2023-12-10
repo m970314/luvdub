@@ -1,6 +1,7 @@
 package com.example.luvdub.UsetInforSet
 
 import android.annotation.SuppressLint
+import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -18,7 +19,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.geometry.Offset
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
@@ -26,10 +26,12 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.snapping.rememberSnapFlingBehavior
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
@@ -39,6 +41,8 @@ import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Divider
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.contentColorFor
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -48,11 +52,15 @@ import androidx.compose.ui.ExperimentalComposeUiApi
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
+import androidx.compose.ui.layout.positionInRoot
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.res.painterResource
@@ -60,14 +68,19 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luvdub.R
 import com.example.luvdub.ui.theme.Pink14
 import com.example.luvdub.ui.theme.White
+import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.util.Calendar
+import java.util.Locale
 
 class UserInforSetFragment {
 
@@ -141,71 +154,34 @@ class UserInforSetFragment {
 
                 Spacer(modifier = Modifier.weight(1f))
 
-                Button(onClick = {
+                // 버튼의 배경색이 그라데이션으로 되어있어서 커스텀 버튼 생성
+                GradientButton(
+                    "다음",
+                    onClick = {
+                        // 다음 Step으로 이동하기 전에 현재 입력한 값을 datastore에 저장
+                        when(currentStep){
+                            1 -> viewModel.saveNickName()
+                            2 -> viewModel.saveCalendar()
+                        }
 
-                    // 다음 Step으로 이동하기 전에 현재 입력한 값을 datastore에 저장
-                    when(currentStep){
-                        1 -> viewModel.saveNickName()
-                        2 -> viewModel.saveCalendar()
-                    }
-
-                    // 다음 스텝으로 이동
-                    if (currentStep < MAX_STEP){
-                        // 다음으로 클릭시 CurrentStep값을 +1 해줌
-                        viewModel.incrementCurrentStep()
-                    } else {
-                        // 혹시나 Step이 설정 이외의 값으로 튀었을때 Step초기화
-                        viewModel.clearCurrentStep()
-                    }
-                },
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = White,
-                        contentColor = White
-                    ),
-
+                        // 다음 스텝으로 이동
+                        if (currentStep < MAX_STEP){
+                            // 다음으로 클릭시 CurrentStep값을 +1 해줌
+                            viewModel.incrementCurrentStep()
+                        } else {
+                            // 혹시나 Step이 설정 이외의 값으로 튀었을때 Step초기화
+                            viewModel.clearCurrentStep()
+                        }
+                    },
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(start = 40.dp, end = 40.dp, bottom = 20.dp)
                         .height(58.dp),
                     enabled = if (currentStep == 1) userNickname.isNotEmpty() else true
-                ) {
-                    Box(
-                        contentAlignment = Alignment.Center,
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        Image(
-                            painter = painterResource(id = R.drawable.property_btn_on),
-                            contentDescription = null,
-                            modifier = Modifier.size(400.dp),
-                            contentScale = ContentScale.Crop
-                        )
+                    )
 
-                        Text("다음으로")
-                    }
-                }
             }
         }
-    }
-
-    // 타이틀바 아래에 Step에 따른 직선 설정
-    @Composable
-    fun DrawLine(lineRate : Int, lineHeight : Float, lineWeight : Int) {
-        Canvas(
-            modifier = Modifier
-                .fillMaxWidth()
-                .background(Pink14),
-            onDraw = {
-                var maxStep = 4
-                var lineWidth = (size.width/maxStep * lineRate) // 스텝에 따라 동적으로 선의 길이 계산
-                drawLine(
-                    color = Pink14,
-                    start = Offset(0f, 0f),
-                    end = Offset(lineWidth, lineHeight),
-                    strokeWidth = lineWeight.dp.toPx(),
-                    cap = StrokeCap.Round
-                )
-            }
-        )
     }
 
     @OptIn(ExperimentalComposeUiApi::class)
@@ -422,6 +398,7 @@ class UserInforSetFragment {
     @Composable
     fun Step3Content() {
         // Step 3의 UI 구성
+        var allowTextPosition by remember { mutableStateOf(Offset(0f, 0f)) } // 허용 텍스트의 위치값(원 이미지를 허용텍스트 위에 올리기위함)
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
@@ -511,7 +488,9 @@ class UserInforSetFragment {
 
                     Divider(
                         color = Color(0x52FF4B7B),
-                        modifier = Modifier.fillMaxWidth().height(1.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(1.dp)
                     )
 
                     Row(
@@ -533,38 +512,26 @@ class UserInforSetFragment {
 
                         Divider(
                             color = Color(0x52FF4B7B),
-                            modifier = Modifier.fillMaxHeight().width(1.dp)
+                            modifier = Modifier
+                                .fillMaxHeight()
+                                .width(1.dp)
                         )
 
-                        // 겹치게 하는 부분
-                        Box(
+                        Text(
+                            text = "허용",
                             modifier = Modifier
                                 .weight(1f)
-                                .background(Color.Transparent) // Transparent background
-                        ) {
-                            Image(
-                                painter = painterResource(id = R.drawable.alarm_round),
-                                contentDescription = "image description",
-                                Modifier
-                                    .blur(radius = 4.dp)
-                                    .fillMaxSize(),
-                                contentScale = ContentScale.Crop
+                                .onGloballyPositioned { coordinates ->
+                                    allowTextPosition = coordinates.positionInRoot()
+                                },
+                            style = TextStyle(
+                                fontSize = 17.sp,
+                                lineHeight = 22.sp,
+                                fontWeight = FontWeight(600),
+                                color = Color(0xFFFA114F),
+                                textAlign = TextAlign.Center,
                             )
-
-                            Text(
-                                text = "허용",
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .padding(16.dp), // Add padding for better visibility
-                                style = TextStyle(
-                                    fontSize = 17.sp,
-                                    lineHeight = 22.sp,
-                                    fontWeight = FontWeight(600),
-                                    color = Color(0xFFFA114F),
-                                    textAlign = TextAlign.Center,
-                                )
-                            )
-                        }
+                        )
                     }
                 }
             }
@@ -573,9 +540,12 @@ class UserInforSetFragment {
                 painter = painterResource(id = R.drawable.alarm_round),
                 contentDescription = "image description",
                 Modifier
+                    .offset{IntOffset(allowTextPosition.x.toInt(),allowTextPosition.y.toInt())}
                     .blur(radius = 4.dp),
                 contentScale = ContentScale.Crop
             )
+
+            Log.d("position", allowTextPosition.toString() + "//" + allowTextPosition.x.dp)
         }
     }
 
@@ -589,6 +559,73 @@ class UserInforSetFragment {
                 28
             }
         }
+    }
+
+    @Composable
+    fun GradientButton(
+        text : String,
+        onClick: () -> Unit,
+        modifier: Modifier = Modifier,
+        enabled : Boolean
+    ) {
+        // 그라데이션 색상 설정
+        val gradientBrush = Brush.horizontalGradient(
+            colors = listOf(
+                Color(0xFFFC122F),
+                Color(0xFFFF4C7B)
+            ),
+        )
+
+        // 버튼 영역 설정
+        // 버튼 내용
+        Button(
+            onClick = onClick,
+            modifier = modifier,
+            contentPadding = PaddingValues(),
+            colors = ButtonDefaults.buttonColors(
+                containerColor = Color.Transparent,
+                contentColor = Color.Transparent,
+                disabledContentColor = contentColorFor(MaterialTheme.colorScheme.primary)
+            ),
+            enabled = enabled
+        ) {
+            Box(
+                Modifier
+                    .fillMaxSize()
+                    .background(gradientBrush),
+                contentAlignment = Alignment.Center,
+            ) {
+                Text(text = text,
+                    style = TextStyle(
+                        fontSize = 22.sp,
+                        fontWeight = FontWeight(700),
+                        color = Color(0xFFFFFFFF),
+                        textAlign = TextAlign.Center,
+                        letterSpacing = 0.1.sp,
+                    ))
+            }
+
+        }
+    }
+    // 타이틀바 아래에 Step에 따른 직선 설정
+    @Composable
+    fun DrawLine(lineRate : Int, lineHeight : Float, lineWeight : Int) {
+        Canvas(
+            modifier = Modifier
+                .fillMaxWidth()
+                .background(Pink14),
+            onDraw = {
+                var maxStep = 4
+                var lineWidth = (size.width/maxStep * lineRate) // 스텝에 따라 동적으로 선의 길이 계산
+                drawLine(
+                    color = Pink14,
+                    start = Offset(0f, 0f),
+                    end = Offset(lineWidth, lineHeight),
+                    strokeWidth = lineWeight.dp.toPx(),
+                    cap = StrokeCap.Round
+                )
+            }
+        )
     }
 
     @OptIn(ExperimentalFoundationApi::class)
