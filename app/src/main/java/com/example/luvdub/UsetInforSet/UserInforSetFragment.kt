@@ -1,7 +1,12 @@
 package com.example.luvdub.UsetInforSet
 
+import android.Manifest
 import android.annotation.SuppressLint
+import android.content.pm.PackageManager
+import android.os.Build
 import android.util.Log
+import androidx.activity.ComponentActivity
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -74,6 +79,9 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.core.app.ActivityCompat.shouldShowRequestPermissionRationale
+import androidx.core.content.ContentProviderCompat.requireContext
+import androidx.core.content.ContextCompat
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.luvdub.R
 import com.example.luvdub.ui.theme.Pink14
@@ -82,8 +90,7 @@ import org.intellij.lang.annotations.JdkConstants.HorizontalAlignment
 import java.util.Calendar
 import java.util.Locale
 
-class UserInforSetFragment {
-
+class UserInforSetFragment : ComponentActivity() {
     @Composable
     @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
     @OptIn(ExperimentalMaterial3Api::class)
@@ -150,6 +157,7 @@ class UserInforSetFragment {
                     1 -> Step1Content(userNickname,viewModel)
                     2 -> Step2Content(userCalendar_year,userCalendar_month,userCalendar_day,viewModel)
                     3 -> Step3Content()
+                    //4 -> requestNotificationPermission()
                 }
 
                 Spacer(modifier = Modifier.weight(1f))
@@ -540,7 +548,12 @@ class UserInforSetFragment {
                 painter = painterResource(id = R.drawable.alarm_round),
                 contentDescription = "image description",
                 Modifier
-                    .offset{IntOffset(allowTextPosition.x.toInt(),allowTextPosition.y.toInt())}
+                    .offset {
+                        IntOffset(
+                            (allowTextPosition.x + (27.dp).toPx()).toInt(),
+                            (allowTextPosition.y - (93.dp).toPx()).toInt()
+                        )
+                    }
                     .blur(radius = 4.dp),
                 contentScale = ContentScale.Crop
             )
@@ -548,7 +561,6 @@ class UserInforSetFragment {
             Log.d("position", allowTextPosition.toString() + "//" + allowTextPosition.x.dp)
         }
     }
-
     private fun lastDayInMonth(month: Int, year: Int): Int {
         return if (month != 2) {
             31 - (month - 1) % 7 % 2
